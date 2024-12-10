@@ -1,3 +1,6 @@
+import authx
+from datetime import timedelta
+
 from passlib.context import CryptContext
 
 from sqlalchemy.orm import Session
@@ -6,7 +9,7 @@ from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 
 from FastAPI.pkg.db.models import User
-
+from FastAPI.pkg.jwt.jwt_config import security, config
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
@@ -37,7 +40,7 @@ class UserRepository:
 
         return JSONResponse(status_code=201, content={"Message": "You are registered successfully!"})
 
-    def login(self, email: str, password: str) -> JSONResponse:
+    def login(self, response: str, email: str, password: str) -> JSONResponse:
 
         if not self.db.query(User).filter_by(email=email).first():
 
@@ -45,8 +48,12 @@ class UserRepository:
 
         user = self.db.query(User).filter_by(email=email).first()
 
+
         if check_password(password=password, stored_hash=user.password):
 
-            return JSONResponse(status_code=200, content={"message": "Success login!"})
-        
+            token = security.create_access_token(uid=str(user.id))
+            response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
+             
+            return JSONResponse(status_code=200, content={"message": "Success login!"})    
+  
         raise HTTPException(status_code=401, detail="Invalid password.")

@@ -5,10 +5,9 @@ load_dotenv()
 
 from sqlalchemy.orm import Session
 
-from authx import AuthX
-from authx.models import AuthConfig
+from authx import AuthX, AuthXConfig
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 
@@ -19,18 +18,21 @@ from FastAPI.internal.routes.auth.schemas import (
     RegistrationSchema,
     LoginSchema,
 )
+from FastAPI.internal.routes.auth.services import (
+    get_current_user_from_cookies,
+)
 
 router = APIRouter(
     prefix='/auth',
     tags=['User services']
 )
 
-authx = AuthX(
-    AuthConfig(
-        secret=os.getenv("SECRET_KEY"),
-        algorithms=["HS256"],  
-    )
-)
+config = AuthXConfig()
+config.JWT_SECRET_KEY="SECRET_KEY"
+config.JWT_ACCESS_COOKIE_NAME="access_token"
+config.JWT_TOKEN_LOCATION=["cookies"]
+
+security = AuthX(config=config)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -56,11 +58,11 @@ def register_user(data: RegistrationSchema, userRepository: UserRepository = Dep
                 })
 
 @router.post("/login")
-def login_user(data:LoginSchema,  userRepository: UserRepository = Depends(get_user_service)):
+async def login_user(data:LoginSchema, response: Response,  userRepository: UserRepository = Depends(get_user_service)):
 
     try:
 
-        return userRepository.login(email=data.email, password=data.password)
+        return userRepository.login(response=response, email=data.email, password=data.password)
 
     except HTTPException as e:
 
