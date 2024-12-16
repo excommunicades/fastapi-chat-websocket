@@ -5,8 +5,6 @@ load_dotenv()
 
 from sqlalchemy.orm import Session
 
-from authx import AuthX, AuthXConfig
-
 from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
@@ -19,17 +17,14 @@ from FastAPI.internal.routes.auth.schemas import (
     LoginSchema,
 )
 from FastAPI.internal.routes.auth.services import (
-    get_current_user_from_cookies,
+    get_current_user,
 )
+from FastAPI.pkg.db.models import User
 
 router = APIRouter(
     prefix='/auth',
     tags=['User services']
 )
-
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
 
 def get_user_service(db: Session = Depends(get_db)):
 
@@ -65,3 +60,7 @@ async def login_user(data:LoginSchema, response: Response,  userRepository: User
                 content={
                     "errors": e.detail,
                 })
+
+@router.get("/protected")
+async def protected_route(current_user: User = Depends(get_current_user)):
+    return {"message": f"Hello, {current_user.username}"}
