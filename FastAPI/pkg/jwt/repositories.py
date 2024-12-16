@@ -7,7 +7,7 @@ from typing import Optional
 
 from FastAPI.pkg.jwt.jwt_config import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
-    SECRET_KEY,
+    JWT_SECRET_KEY,
     ALGORITHM
 )
 
@@ -26,6 +26,6 @@ class JWTRepository:
 
             to_encode.update({"exp": ACCESS_TOKEN_EXPIRE_MINUTES})
 
-        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
 
         return encoded_jwt

@@ -1,41 +1,28 @@
-import authx
+from fastapi import Depends, HTTPException, status
+from jose import JWTError, jwt
 
-from datetime import timedelta
+from FastAPI.internal.routes.auth.auth import aouth2_scheme
+from FastAPI.pkg.jwt.jwt_config import JWT_SECRET_KEY, ALGORITHM
+from FastAPI.pkg.db.models import User
+def get_current_user(token: str = Depends(aouth2_scheme)):
 
-from fastapi import FastAPI, Depends, HTTPException, Cookie, Response
-
-def set_tokens_in_cookies(response: Response, access_token: str, refresh_token: str):
-
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=False,
-        samesite="Strict",
-        max_age=timedelta(minutes=15)
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail='Couldn\'t validate creditials',
+        headers={'WWW-Authenticate': 'Bearer'},
     )
-
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=False,
-        samesite="Strict",
-        max_age=timedelta(days=1)
-    )
-
-def get_current_user_from_cookies(access_token: str = Cookie(None)):
-
-    if access_token is None:
-
-        raise HTTPException(status_code=401, detail="Access token is missing")
 
     try:
 
-        user = authx.decode_token(access_token)
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get('sub')
 
-        return user
+        if username is None:
 
-    except Exception as e:
+            raise credentials_exception
 
-        raise HTTPException(status_code=401, detail="Invalid token")
+        return User(username=username)
+
+    except JWTError:
+
+        raise credentials_exception

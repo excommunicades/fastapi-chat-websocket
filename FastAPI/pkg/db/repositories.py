@@ -9,7 +9,6 @@ from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 
 from FastAPI.pkg.db.models import User
-from FastAPI.pkg.jwt.jwt_config import security, config
 from FastAPI.pkg.jwt.repositories import JWTRepository
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
