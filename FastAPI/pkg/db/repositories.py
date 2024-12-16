@@ -55,7 +55,7 @@ class UserRepository:
 
             response = JSONResponse(status_code=200, content={"message": "Success login!"})
 
-            response.set_cookie(key='access_token', value=access_token, httponly=True)
+            response.set_cookie(key='access_token', value=access_token, httponly=True, max_age=60*60, secure=False)
 
             return response
   

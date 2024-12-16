@@ -1,11 +1,10 @@
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
 from sqlalchemy.orm import Session
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 
@@ -63,4 +62,5 @@ async def login_user(data:LoginSchema, response: Response,  userRepository: User
 
 @router.get("/protected")
 async def protected_route(current_user: User = Depends(get_current_user)):
+
     return {"message": f"Hello, {current_user.username}"}
