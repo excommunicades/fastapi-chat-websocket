@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 
 from FastAPI.pkg.db.models import User
 from FastAPI.pkg.jwt.jwt_config import security, config
+from FastAPI.pkg.jwt.repositories import JWTRepository
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
@@ -51,9 +52,12 @@ class UserRepository:
 
         if check_password(password=password, stored_hash=user.password):
 
-            token = security.create_access_token(uid=str(user.id))
-            response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
-             
-            return JSONResponse(status_code=200, content={"message": "Success login!"})    
+            access_token = JWTRepository.create_access_token(data={"sub": user.username})
+
+            response = JSONResponse(status_code=200, content={"message": "Success login!"})
+
+            response.set_cookie(key='access_token', value=access_token, httponly=True)
+
+            return response
   
         raise HTTPException(status_code=401, detail="Invalid password.")

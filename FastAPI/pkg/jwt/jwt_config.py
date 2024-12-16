@@ -1,8 +1,7 @@
 from authx import AuthX, AuthXConfig
 
-config = AuthXConfig()
-config.JWT_SECRET_KEY = "SECRET_KEY"
-config.JWT_ACCESS_COOKIE_NAME = "access_token"
-config.JWT_TOKEN_LOCATION = ["cookies"]
+JWT_SECRET_KEY = "SECRET_KEY"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-security = AuthX(config=config)
+authx = AuthX(secret=JWT_SECRET_KEY)

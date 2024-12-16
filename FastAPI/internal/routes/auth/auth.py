@@ -27,12 +27,6 @@ router = APIRouter(
     tags=['User services']
 )
 
-config = AuthXConfig()
-config.JWT_SECRET_KEY="SECRET_KEY"
-config.JWT_ACCESS_COOKIE_NAME="access_token"
-config.JWT_TOKEN_LOCATION=["cookies"]
-
-security = AuthX(config=config)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
