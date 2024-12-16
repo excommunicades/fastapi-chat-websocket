@@ -14,6 +14,8 @@ async def websocket_chat(websocket: WebSocket):
 
     active_connections.append(websocket)
 
+    userId = websocket.query_params.get('userId')
+
     try:
 
         while True:
@@ -24,7 +26,7 @@ async def websocket_chat(websocket: WebSocket):
 
                 if connection != websocket:
 
-                    await connection.send_text(f"Message: {message}")
+                    await connection.send_text(f"{userId}: {message}")
 
     except WebSocketDisconnect:
 
